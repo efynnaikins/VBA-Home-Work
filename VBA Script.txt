@@ -1,0 +1,159 @@
+Sub stock()
+    Dim ws As Worksheet
+    For Each ws In Sheets
+    ws.Activate
+With ActiveWindow
+  ' Set an initial variable for holding the Ticker name
+  Dim Ticker As String
+
+  ' Set an initial variable for holding the total per Ticker
+  Dim Ticker_Total As Double
+  Ticker_Total = 0
+
+  ' Keep track of the location for each Ticker in the summary table
+  Dim Sum_Ticker As Integer
+  Sum_Ticker = 2
+  
+  lrow = Cells(Rows.Count, 1).End(xlUp).Row
+  
+  'Label Summary table
+  Range("J1") = "Ticker"
+  Range("k1") = "Change"
+  Range("l1") = "Percentage Change"
+  Range("M1") = "Total Volume"
+  Range("O2") = "Greatest % Increase"
+  Range("O3") = "Greatest % Decrease"
+  Range("O4") = "Greatest Total Volume"
+  Range("P1") = "Ticker"
+  Range("Q1") = "Value"
+  
+  
+  
+
+' Loop through all Ticker Data
+  For i = 2 To lrow
+  
+
+    ' Check if we are still within the same Ticker , if it is not...
+    If Cells(i + 1, 1).Value <> Cells(i, 1).Value Then
+ 
+    ' Set the Ticker
+      Ticker = Cells(i, 1).Value
+    'Define last and First Ticker Occurance range & Set
+    
+    Dim last_Ticker As Range
+    Dim first_ticker As Range
+    Set first_ticker = Range("A:A").Find(what:=Ticker, lookat:=xlWhole, after:=Range("A1"))
+    
+    Set last_Ticker = Range("A:A").Find(what:=Ticker, lookat:=xlWhole, after:=Range("A1"), searchorder:=xlByColumns, searchdirection:=xlPrevious)
+    'Calculate Change and Percentage Change
+    Change = last_Ticker.Offset(0, 5) - first_ticker.Offset(0, 2)
+    'Accounting for posible div by zero encounters
+    If first_ticker.Offset(0, 2) <> 0 Then
+    Change_per = Change / first_ticker.Offset(0, 2)
+    Else:  Change_per = 0
+End If
+      ' Add to the Ticker Total
+      
+      Ticker_Total = Ticker_Total + Cells(i, 7).Value
+    
+      ' Print the Ticker in the Summary Table
+      Range("j" & Sum_Ticker).Value = Ticker
+      'Print Change in summary table
+      Range("K" & Sum_Ticker).Value = Change
+      Range("K" & Sum_Ticker).NumberFormat = "0.000000000"
+      'Print & Format  Percentage Change in Summary Table
+      
+      Range("l" & Sum_Ticker).Value = Change_per
+      Range("l" & Sum_Ticker).NumberFormat = "0.00%"
+      'Format Background Color based on change
+  
+       If Range("K" & Sum_Ticker).Value > 0 Then
+            Range("K" & Sum_Ticker).Interior.ColorIndex = 4
+            Else: Range("K" & Sum_Ticker).Interior.ColorIndex = 3
+End If
+
+    ' Print the Ticker total to the Summary Table
+      Range("M" & Sum_Ticker).Value = Ticker_Total
+      
+    ' Add one to the summary table row
+     Sum_Ticker = Sum_Ticker + 1
+      
+    ' Reset the Ticker Total
+      Ticker_Total = 0
+        
+    ' If the cell immediately following a row is the same brand...
+   
+    
+    Else
+
+      ' Add to the Ticker Total
+      Ticker_Total = Ticker_Total + Cells(i, 7).Value
+      
+End If
+
+ 
+  Next i
+ 'Find Min and Max Increase and Decrease
+ 'Initiate MIn and Max Variables
+  Min = 0
+  Max = 0
+  Max_total = 0
+  lastrow = Cells(Rows.Count, 12).End(xlUp).Row
+  'Loop through col for min ,max and mx total
+  For j = 2 To lastrow
+    If Cells(j, 12) > Max Then
+    Max = Cells(j, 12)
+    Range("q2") = Max
+    Range("P2") = Cells(j, 10)
+    Range("q2").NumberFormat = "0.00%"
+    End If
+    If Cells(j, 12) < Min Then
+    Min = Cells(j, 12)
+    Range("q3") = Min
+    Range("P3") = Cells(j, 10)
+    Range("q3").NumberFormat = "0.00%"
+    End If
+    If Cells(j, 13) > Max_total Then
+    Max_total = Cells(j, 13)
+    Range("q4") = Max_total
+    Range("P4") = Cells(j, 10)
+    End If
+   
+   Next j
+  
+  
+  
+  End With
+    Cells.EntireColumn.AutoFit
+    ActiveWindow.FreezePanes = False
+    Sheets(ws.Name).Select
+    
+  Next ws
+  
+  End Sub
+  
+  
+
+
+
+  
+ 
+  
+  
+
+
+
+
+
+  
+ 
+  
+  
+
+
+
+
+
+
+
